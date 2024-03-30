@@ -67,7 +67,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div>Update data </div>
+    <div>page</div>
   )
 }
 
