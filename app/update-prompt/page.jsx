@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -64,3 +63,4 @@ const UpdatePrompt = () => {
 };
 
 export default UpdatePrompt;
+
