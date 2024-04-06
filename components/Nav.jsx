@@ -4,48 +4,49 @@ import Image from "next/image";
 import { useState } from "react";
 import axios from 'axios';
 import ClearIcon from '@mui/icons-material/Clear';
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // Corrected import from "next/navigation"
 
 const Nav = () => {
   const router = useRouter();
   const [toggleDropdown, setToggleDropdown] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isUserClick, setIsUserClick] = useState(false);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [photo, setPhoto] = useState(null);
+  const [user, setUser] = useState({
+    username: "",
+    email: "",
+    password: "",
+    profile: null // Initialize profile as null for file upload
+  });
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const signIn = async (e) => {
+    e.preventDefault(); // Prevent default form submission behavior
     try {
-      // Your form submission logic here...
+      const formData = new FormData();
+      formData.append('username', user.username);
+      formData.append('email', user.email);
+      formData.append('password', user.password);
+      formData.append('profile', user.profile); // Append profile image to FormData
 
-      // Assuming the form submission is successful, set isUserLoggedIn to true
-      setIsUserLoggedIn(true);
-
-      // Redirect the user to /
-      router.push('/');
-      // const formData = new FormData();
-      formData.append('username', username);
-      formData.append('email', email);
-      formData.append('photo', photo);
-      // Send a POST request to the API route
-      const response = await axios.post('/api/signup', formData, {
+      const response = await axios.post('/api/auth/user', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
 
-      console.log(response.data); // Log the response from the API
-
-      // Reset form fields
-      setUsername("");
-      setEmail("");
-      setPhoto(null);
+      console.log("User signed in", response.data);
+      router.push('/');
       setIsUserClick(false);
-    } catch (error) {
-      console.error('Error submitting form:', error);
+      setIsUserLoggedIn(true);
+    } catch (err) {
+      console.log("Failed to sign in", err.message);
+    }
+  };
+
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    console.log(File);
+    if (file) {
+      setUser({ ...user, profile: file });
     }
   };
 
@@ -96,10 +97,12 @@ const Nav = () => {
       </div>
 
       {/* Conditional rendering for sign-up form */}
-     {/* Conditional rendering for sign-up form */}
-     {isUserClick && (
+      {isUserClick && (
         <div className='signup'>
-          <form className="fixed inset-0 flex justify-center items-center z-50 bg-opacity-50 bg-gray-900 backdrop-filter backdrop-blur-lg" onSubmit={handleSubmit}>
+          <form
+            className="fixed inset-0 flex justify-center items-center z-50 bg-opacity-50 bg-gray-900 backdrop-filter backdrop-blur-lg"
+            onSubmit={signIn}
+          >
             <div className="flex flex-col bg-black text-white p-6 rounded-lg">
               <div className="h-34 w-45 flex justify-end">
                 <ClearIcon onClick={() => setIsUserClick(false)} />
@@ -109,21 +112,55 @@ const Nav = () => {
               <label htmlFor="username" className="flex flex-row border-black mb-2">
                 Enter username
               </label>
-              <input type="text" name="username" id="username" className="ml-2 border-2 border-black px-2 py-1 text-black" />
+              <input
+                type="text"
+                name="username"
+                id="username"
+                className="ml-2 border-2 border-black px-2 py-1 text-black"
+                value={user.username}
+                onChange={(e) => setUser({ ...user, username: e.target.value })}
+                placeholder="Enter username"
+              />
 
               <label htmlFor="email" className="mb-2">Enter email</label>
-              <input type="email" name="email" id="email" className="border-2 border-black px-2 py-1 mb-2" />
+              <input
+                type="email"
+                name="email"
+                id="email"
+                className="border-2 border-black px-2 py-1 mb-2 text-black"
+                value={user.email}
+                onChange={(e) => setUser({ ...user, email: e.target.value })}
+                placeholder="Enter email"
+              />
 
-              <label htmlFor="image" className="mb-2">Enter Image</label>
-              <input type="file" name="image" id="image" className="border-2 border-black px-2 py-1 mb-2 text-black" />
+              <label htmlFor="password" className="mb-2">Enter password</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                className="border-2 border-black px-2 py-1 mb-2 text-black"
+                value={user.password}
+                onChange={(e) => setUser({ ...user, password: e.target.value })}
+                placeholder="Enter password"
+              />
 
-              <button type="submit" className="mb-2 bg-white text-black px-4 py-2 rounded"   >Submit</button>
+              <label htmlFor="profile" className="mb-2">Upload profile image</label>
+              <input
+                type="file"
+                accept="image/*"
+                name="profile"
+                id="profile"
+                className="border-2 border-black px-2 py-1 mb-2 text-white"
+                onChange={handleProfileChange}
+              />
+
+              <button type="submit" className="mb-2 bg-white text-black px-4 py-2 rounded">
+                Submit
+              </button>
             </div>
           </form>
         </div>
       )}
-
-
 
       {/* Mobile Navigation */}
       <div className='sm:hidden flex relative'>
